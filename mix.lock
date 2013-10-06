@@ -1,0 +1,2 @@
+[ "jazz": {:git, "git://github.com/meh/jazz.git", "e8bf829c20dcde9816de44e80d4d1986132a978e", []},
+  "json": {:git, "git://github.com/cblage/elixir-json.git", "9bac6d4767170bc71b91b8548d8dc8eb19fa938a", []} ]
