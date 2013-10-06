@@ -9,16 +9,42 @@ defmodule Exhar do
                    response: Exhar.Response, cache: nil, timings: Exhar.PageTimings,
                    serverIPAddress: nil, connection: nil, comment: nil
 
+  defrecord PageTimings, onContentLoad: nil, onLoad: nil, comment: nil
+  defrecord Cookie, name: nil, value: nil, path: nil, domain: nil, expires: nil, httpOnly: nil, secure: nil, comment: nil
+  defrecord Header, name: nil, value: nil, comment: nil
+  defrecord QueryString, name: nil, value: nil, comment: nil
+  defrecord PostData, mimeTypes: nil, params: [Exhar.Param], text: nil, comment: nil
+  defrecord Param, name: nil, value: nil, fileName: nil, contentType: nil, comment: nil
+  defrecord Content, size: nil, compression: nil, mimeType: nil, text: nil, comment: nil
+
   defrecord Request, method: nil,
                      url: nil,
                      httpVersion: nil,
                      cookies: [Exhar.Cookie],
                      headers: [Exhar.Header],
                      queryString: [Exhar.QueryString],
-                     postData: [Exhar.PostData],
+                     postData: Exhar.PostData,
                      headersSize: nil,
                      bodySize: nil,
-                     comment: nil
+                     comment: nil do
+
+    def method_atom(Request[method: method]) do
+      String.downcase(method) |> binary_to_atom :utf8
+    end
+
+    def header_proplist(Request[headers: headers]) do
+      Enum.map headers, fn Header[name: name, value: value] -> {name, value} end
+    end
+
+    def payload(Request[postData: nil]), do: ""
+    def payload(Request[postData: PostData[text: nil]]), do: ""
+    def payload(Request[postData: PostData[text: text]]), do: text
+
+    def perform(req) do
+      :hackney.request req.method_atom, req.url, req.header_proplist, req.payload, follow_redirect: true
+    end
+
+  end
 
   defrecord Response, status: nil,
                       statusText: nil,
@@ -30,16 +56,7 @@ defmodule Exhar do
                       headersSize: nil,
                       bodySize: nil,
                       comment: nil
-              
-  defrecord PageTimings, onContentLoad: nil, onLoad: nil, comment: nil
-  defrecord Cookie, name: nil, value: nil, path: nil, domain: nil, expires: nil, httpOnly: nil, secure: nil, comment: nil
-  defrecord Header, name: nil, value: nil, comment: nil
-  defrecord QueryString, name: nil, value: nil, comment: nil
-  defrecord PostData, mimeTypes: nil, params: [Exhar.Param], text: nil, comment: nil
-  defrecord Param, name: nil, value: nil, fileName: nil, contentType: nil, comment: nil
-  defrecord Content, size: nil, compression: nil, mimeType: nil, text: nil, comment: nil
 
-  
   def dict_to_record(nil, record) do
     record.new
   end
@@ -57,7 +74,7 @@ defmodule Exhar do
   def load(path) do
     har = File.read!(path) |> JSON.decode!
     har = har["log"]
-    
+
     dict_to_record(har, HAR)
   end
 
@@ -65,5 +82,5 @@ defmodule Exhar do
     #IEx.Options.set :inspect, limit: 3
     load "testflightapp.com.har"
   end
-  
+
 end

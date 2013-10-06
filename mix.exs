@@ -9,10 +9,11 @@ defmodule Exhar.Mixfile do
   end
 
   def application do
-    []
+    [applications: [:hackney]]
   end
 
   defp deps do
-    [{ :json, github: "cblage/elixir-json"}]
+    [{ :json, github: "cblage/elixir-json"},
+     { :hackney, "0.4.4", [github: "benoitc/hackney", tag: "0.4.4"]}]
   end
 end
