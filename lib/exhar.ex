@@ -40,8 +40,8 @@ defmodule Exhar do
     def payload(Request[postData: PostData[text: nil]]), do: ""
     def payload(Request[postData: PostData[text: text]]), do: text
 
-    def perform(req) do
-      :hackney.request req.method_atom, req.url, req.header_proplist, req.payload, follow_redirect: true
+    def perform(req, url // nil, headers // []) do
+      :hackney.request req.method_atom, url || req.url, headers ++ req.header_proplist, req.payload, follow_redirect: true
     end
 
   end

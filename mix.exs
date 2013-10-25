@@ -9,7 +9,7 @@ defmodule Exhar.Mixfile do
   end
 
   def application do
-    [applications: [:hackney]]
+    [applications: [:ssl, :hackney]]
   end
 
   defp deps do
